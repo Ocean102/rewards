@@ -55,6 +55,7 @@ const Content = ({ account }: { account: Account }) => <div className='mt-5 px-3
 // THE REQUIRED FUNCTION TO HAVE THE DATE COMPATIBLE WITH THE REWARDS'S DAILY PROMOTION SET DATE FORMAT 
 const d=new Date()
 const getDate=()=>`${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getDate()).padStart(2,"0")}/${d.getFullYear()}`
+const getLevel = (string: string): number => Number(string.toLowerCase().split("level")[1])
 
 // CACHE KEY
 const CACHE_KEY = config.cache
@@ -108,21 +109,35 @@ const App = () => {
         const data: Record<string, any> = rewards.userStatus
         const search: Record<string, number> = data.counters.pcSearch[0]
         const quest = [...rewards.dailySetPromotions[getDate()], ...rewards.morePromotions]
-        let completed = 0
         
         // TRACK COMPLETED QUESTS
-        quest.forEach(v => v.complete && completed++)
+        const userLevel = getLevel(rewards.userStatus.levelInfo.activeLevel)
+        let completed = 0
+        let ammount = 0
+
+        quest.forEach(v => { 
+          const questLevel = getLevel(v.attributes.locked_category_criteria || "level1")
+          const eligible = userLevel >= questLevel
+
+          console.log("[QUEST]", v.title, "unlock at level", questLevel, "and the user is eligible:", eligible)
+
+          if (eligible) {
+            ammount++
+            if (v.complete) completed++
+          }
+        })
+
         
         // INITIALIZES NEW DATA
         const freshData: Account = {
           ...userData,
           points: rewards.userStatus.availablePoints,
           streak: rewards.streakProtectionPromo.streakCount,
-          level: rewards.userStatus.levelInfo.activeLevel.toLowerCase().split('level')[1],
+          level: userLevel,
           name: user,
           pfp: pfp,
           search: { max: search.pointProgressMax, val: search.pointProgress },
-          quest: { amount: quest.length, completed: completed, },
+          quest: { amount: ammount, completed: completed, },
           redeem: {
             price: rewards.autoRedeemItem.price,
             name: rewards.autoRedeemItem.title && rewards.autoRedeemItem.title.split('—')[1].trim(),

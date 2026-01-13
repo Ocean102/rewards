@@ -1,8 +1,7 @@
 // background.js
 import { api } from './api.js'
 
-// ===== QUERIES GENERATOR =====
-// THE QUERIES LIST WOULD BE WAY TOOO BIG IF I TRIED TO MAKE IT NON-DYNAMIC
+// ===== CONFIG / QUERIES =====
 
 const year = new Date().getFullYear()
 const searches = []
@@ -186,7 +185,6 @@ const sleep = (ms) => new Promise(res => setTimeout(res, ms))
 const getLevel = (string) => Number(string.toLowerCase().split("level")[1])
 
 // ===== ACCOUNT & QUEST =====
-
 async function getAccountData() {
   const accountText = await (await fetch('https://rewards.bing.com/', { credentials: 'include' })).text()
   const token = accountText.split(`<input name="__RequestVerificationToken" type="hidden" value="`)[1].split('"')[0]
@@ -209,7 +207,7 @@ async function getAccountData() {
   const userLevel = getLevel(rewards.userStatus.levelInfo.activeLevel)
 
   quest.forEach(v => { 
-    const questLevel = getLevel(v.attributes.user_level || "level1")
+    const questLevel = getLevel(v.attributes.locked_category_criteria || "level1")
     if (!v.complete && userLevel >= questLevel) unfinished.push(v)
   })
 
@@ -217,7 +215,7 @@ async function getAccountData() {
   return { token, rewards, quest, unfinished, search }
 }
 
-// ===== REPORTER =====
+// ===== QUEST REPORTER =====
 
 const DoQuest = async (item, token) => fetch(api.quest, {
   "headers": {
@@ -237,8 +235,8 @@ const DoQuest = async (item, token) => fetch(api.quest, {
   "credentials": "include"
 })
 
-
-async function ReportSearch(query) {
+// ===== SEARCH REPORTER =====
+async function reportBingActivity(query) {
   const IG = randomHex(32)
   const IID = `SERP.${Math.floor(Math.random() * 10000)}`
   const rdr = Math.floor(Math.random() * 10) + 1
@@ -270,6 +268,21 @@ async function mainLoop() {
   let { token, unfinished, search } = await getAccountData()
   if (!token) return console.error("Failed to get token")
 
+  let searchesDone = 0
+  const maxSearches = search.pointProgressMax
+  const queries = searches.sort(() => 0.5 - Math.random())
+
+  for (let query of queries) {
+    if (state.searchPoints >= maxSearches) break
+    try { await reportBingActivity(query) } catch(e) { console.error(e) }
+
+    searchesDone++
+    state.searchPoints += 3
+    chrome.storage.local.set({ lastDate: today, searchPoints: state.searchPoints })
+
+    await sleep(6500 + Math.random() * 500)
+  }
+
   for (const quest of unfinished) {
     try {
       await sleep(2000)
@@ -277,21 +290,6 @@ async function mainLoop() {
     } catch (e) {
       console.error("Quest error:", e)
     }
-  }
-
-  let searchesDone = 0
-  const maxSearches = search.pointProgressMax
-  const queries = searches.sort(() => 0.5 - Math.random())
-
-  for (let query of queries) {
-    if (state.searchPoints >= maxSearches) break
-    try { await ReportSearch(query) } catch(e) { console.error(e) }
-
-    searchesDone++
-    state.searchPoints += 3
-    chrome.storage.local.set({ lastDate: today, searchPoints: state.searchPoints })
-
-    await sleep(6500 + Math.random() * 500)
   }
 }
 
