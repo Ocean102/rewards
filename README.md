@@ -6,11 +6,12 @@ Using this will gain advantages as this automator i made have got background ear
 
 # Features
 
-| Name       | Description                |
-| :--------- | :------------------------- |
-| `Tracking` | This feature will be tracking: Points, Streak, Progress and your redeem goal |
+I have made every single feature on my own and im very proud to share you those, very few but its all i could give out with my coding skill:
 
+Points tracking - Tracking your points balance
+Progress overview - Tracking your progress of earning points through quests and searches
+Background Earning - This integration will be earning you points through searches and quests while you relax watching Youtube browser while also continuing your streak
 
 ### Disclaimer
 - I am not responsible for your account getting banned as it had been mentioned in the Term of Service that using external software to gain advantages is completely forbidded
-- Your quests wont be done IF your browser isn't on (watching Youtube is recommended)
+- Your quests and searches wont be done IF your browser isn't on (watching Youtube is recommended)
