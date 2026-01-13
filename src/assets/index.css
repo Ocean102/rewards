@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@layer base {
+  * { @apply p-0 m-0 }
+
+  button {
+    @apply mb-2 p-1.5 px-2.5 rounded-lg bg-blue-600/80 hover:bg-blue-600/85 active:bg-blue-600/90 transition-colors duration-150 ease-in-out w-full;
+  }
+
+  .noscroll::-webkit-scrollbar {@apply hidden}
+}
+
+@property --percent {
+  syntax: "<percentage>";
+  initial-value: 0%;
+  inherits: false
+}
+
+.progress {
+  @apply mb-2 p-1.5 px-2.5 rounded-lg relative;
+  --color: rgb(57, 110, 255);
+  --percent: 0%;
+  
+  background: linear-gradient(
+    to right,
+    var(--color) 0%,
+    var(--color) var(--percent),
+    #242424 var(--percent),
+    #242424 100%
+  );
+}

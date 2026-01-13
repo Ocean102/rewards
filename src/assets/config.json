@@ -1,0 +1,57 @@
+{
+    "title": "Rewards Automator",
+    "split": {
+        "pfp": "<img id=\"img_sec\" class=\"profile_img\" src=\"",
+        "user": "<a id=\"redirect_info_link\" tabindex=\"0\" class=\"redirect_link additional_info\" data-clarity-mask=\"True\" title=\""
+    },
+
+    "cache": "bing-rewards-cache",
+
+    "text": {
+        "level": "Level",
+
+        "loading": {
+            "title": "Loading...",
+            "content": "fetching data and caching for better experience"
+        },
+
+        "redemption": {
+            "worth": "worth {price} points",
+            "ready": "Redemption is ready!",
+            "remain": "points left",
+            "unknown": "Unknown"
+        },
+
+        "warning": {
+            "title": "WARNING",
+            "content": "this exploits the program with unfair advantages (macro) and your account is NOT ENTIRELY SAFE from the bans"
+        },
+
+        "signin": {
+            "title": "Signing In is required",
+            "content": "this extension is api-based (not controlling your browser) so please log into your account (if you feel unsafe you can check the source code)"
+        },
+
+        "main": {
+            "streak": {
+                "text": "Streak",
+                "suffix": "days"
+            },
+
+            "points": {
+                "text": "Points",
+                "suffix": ""
+            },
+
+            "search": {
+                "text": "Searches",
+                "suffix": ""
+            },
+
+            "quest": {
+                "text": "Quests",
+                "suffix": ""
+            }
+        }
+    }
+}
