@@ -1,11 +1,11 @@
 {
-  "name": "Rewards Automator",
-  "version": "2.0.5",
-  "description": "free open-source automator. Github Repo: https://github.com/Ocean102/rewards",
-  "content_scripts":[{"matches":["*://*.bing.com/","*://bing.com/"],"js":["cors.js"],"run_at":"document_idle"}],
-  "icons":{ "16":"icon.png", "32":"icon.png", "48":"icon.png", "128":"icon.png" },
-  "permissions":["scripting","storage"],
+  "name":"Rewards Automator",
+  "version":"2.2.0",
+  "description":"self-explainatory",
+  "content_scripts":[{"matches":["*://*.bing.com/","*://bing.com/"],"js":["scripts/cors.js"],"run_at":"document_idle"}],
+  "icons":{"16":"assets/icon.png","32":"assets/icon.png","48":"assets/icon.png","128":"assets/icon.png"},
+  "permissions":["scripting","storage","alarms"],
   "action":{"default_popup":"index.html","default_title":"Automator"},
-  "manifest_version": 3,
-  "background": {"service_worker": "background.js","type": "module"}
+  "manifest_version":3,
+  "background":{"service_worker":"scripts/background.js","type": "module"}
 }
