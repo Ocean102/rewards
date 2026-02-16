@@ -76,7 +76,6 @@ type Redemption = {
 }
 
 // REACT COMPONENTS, SELF EXPLAINATORY
-
 let totalBars = 0
 
 export function CountUp({
@@ -138,32 +137,24 @@ const UserFX = {
 }
 
 export const User = ({ name, avatar, level }: UserBadge) => {
-
   return <div className='flex gap-5 items-center'>
     <motion.img
       onError={(e: any) => {e.target.src="https://rewards.bing.com/rewardscdn/images/rewards/membercenter/missions/profilePicBackground.svg"}}
       src={avatar}
       alt={`pfp_${name}`}
-      className='size-12.5 border rounded-full'
-
-      initial={UserFX.initial}
-      animate={UserFX.animate}
+      className='size-12.5 border rounded-full' {...UserFX}
       transition={{ duration: 0.5, ease: "easeInOut" }}
     />
     
     <div className='leading-5'>
       <motion.h1 
-        className='text-[18px] font-semibold'
-        initial={UserFX.initial}
-        animate={UserFX.animate}
+        className='text-[18px] font-semibold' {...UserFX}
         transition={{ delay: 0.2, duration: 0.5, ease: "easeInOut" }}
       >
         {name}
       </motion.h1>
       <motion.p
-        className='flex items-center gap-1.5'
-        initial={UserFX.initial}
-        animate={UserFX.animate}
+        className='flex items-center gap-1.5' {...UserFX}
         transition={{ delay: 0.3, duration: 0.5, ease: "easeInOut" }}
       >
         {config.text.level} {level}
@@ -208,12 +199,4 @@ export const Warning = () => <motion.div
   </div>
 </motion.div>
 
-export const SignIn = () => <motion.div
-  className='p-3.5 pb-2.5'
-  initial={{ opacity: 0, y: -30 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.3 }}
->
-  <h1 className='text-[20px] font-semibold'>{config.text.signin.title}</h1>
-  <p>{config.text.signin.content}</p>
-</motion.div>
+export const SignIn = () => <motion.div className='p-3.5 pb-2.5' transition={{ duration: 0.3 }} initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }}><h1 className='text-[20px] font-semibold'>{config.text.signin.title}</h1> <p>{config.text.signin.content}</p> </motion.div>

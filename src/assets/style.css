@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+:root {
+  --stupid: rgb(57, 110, 255);
+}
+
 @layer base {
   * { @apply p-0 m-0 }
 
@@ -20,8 +24,8 @@
   @apply mb-2 p-1.5 px-2.5 rounded-lg relative;
 
   --offset: 0%;
-  --color: rgb(57, 110, 255);
   --percent: 0%;
+  --color: var(--stupid);
   
   background: linear-gradient(
     to right,

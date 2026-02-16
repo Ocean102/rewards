@@ -47,7 +47,8 @@ const socialMedias = [
   "mixcloud", "kik", "amino", "fanpop", "ravelry", "couchsurfing",
   "meetup", "care2", "researchgate", "academia.edu", "stack overflow",
   "github", "gitlab", "codepen", "dev.to", "hashnode", "product hunt",
-  "angel list", "indie hackers", "quora", "medium", "substack", "kickstarter"
+  "angel list", "indie hackers", "quora", "medium", "substack", "kickstarter",
+  "gofundme", "patreon", "go fund me"
 ]
 
 const gamesWithMaps = [
@@ -187,7 +188,7 @@ const sleep = (ms) => new Promise(res => setTimeout(res, ms))
 const getLevel = (string) => Number(string.toLowerCase().split("level")[1])
 
 // ===== ACCOUNT & QUEST =====
-async function getAccountData() {
+const getAccountData = async () => {
   const accountText = await (await fetch('https://rewards.bing.com/', { credentials: 'include' })).text()
   const token = accountText.split(`<input name="__RequestVerificationToken" type="hidden" value="`)[1].split('"')[0]
 
@@ -219,16 +220,13 @@ async function getAccountData() {
 
 // ===== QUEST REPORTER =====
 
-const DoQuest = async (item, token) => fetch(api.quest, {
+const PostQuest = async (item, token) => fetch(api.quest, {
   "headers": {
     "priority": "u=1, i",
     "accept": "application/json, text/javascript, */*; q=0.01",
     "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
     "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-    "correlation-context": "v=1,ms.b.tel.market=en-GB",
-    "sec-ch-ua": "\"Google Chrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
-    "sec-ch-ua-full-version": "\"143.0.7499.170\"",
-    "sec-ch-ua-full-version-list": "\"Google Chrome\";v=\"143.0.7499.170\", \"Chromium\";v=\"143.0.7499.170\", \"Not A(Brand\";v=\"24.0.0.0\"",
+    "correlation-context": "v=1,ms.b.tel.market=en-GB"
   },
   "referrer": "https://rewards.bing.com/",
   "body": `id=${item.name}&hash=${item.hash}&timeZone=${new Date().getTimezoneOffset()}&activityAmount=1&dbs=0&form=&type=&__RequestVerificationToken=${token}`,
@@ -238,7 +236,7 @@ const DoQuest = async (item, token) => fetch(api.quest, {
 })
 
 // ===== SEARCH REPORTER =====
-async function reportBingActivity(query) {
+const ReportBingActivity = async(query) => {
   const IG = randomHex(32)
   const IID = `SERP.${Math.floor(Math.random() * 10000)}`
   const rdr = Math.floor(Math.random() * 10) + 1
@@ -255,62 +253,55 @@ async function reportBingActivity(query) {
     headers: { "Content-Type": "application/x-www-form-urlencoded", "Accept": "*/*" }
   })
 }
+
 // ===== MAIN LOOP =====
-async function mainLoop() {
-  const today = getDate()
+const Search = async () => {
+  let { search } = await getAccountData()
 
-  // Load last saved search progress
-  let state = await new Promise(res => chrome.storage.local.get(['lastDate', 'finished'], res))
-  if (state.lastDate !== today) {
-    state = { lastDate: today, finished: false }
-    chrome.storage.local.set(state)
-  }
-
-  let { token, unfinished, search } = await getAccountData()
-  if (!token) return console.error("Failed to get token")
-
-  let searchesDone = 0
+  let searchesDone = search.pointProgress / 3
   const maxSearches = search.pointProgressMax
-  const queries = searches.sort(() => 0.5 - Math.random())
+
+  if (searchesDone * 3 >= maxSearches) return chrome.alarms.clear("searches")
+  const queries = [...searches].sort(() => 0.5 - Math.random())
 
   for (let query of queries) {
-    if (state.searchPoints >= maxSearches) break
+    if (searchesDone * 3 >= maxSearches) break
     try {
-      reportBingActivity(query)
-      console.log("Sending a request to search:", query)
+      console.log("Searching:", query)
+      await ReportBingActivity(query)
     }
-    catch(e) {
-      console.error(e)
-    }
+    catch(e) { console.error("Search error:", e) }
 
     searchesDone++
-    state.searchPoints += 3
-    chrome.storage.local.set({ lastDate: today, searchPoints: state.searchPoints })
-
-    await sleep(6500 + Math.random() * 500)
+    await sleep(6300 + Math.random() * 500)
   }
+}
 
+const Quest = async () => {
+  let { token, unfinished } = await getAccountData()
+
+  if (unfinished.length < 1) return chrome.alarms.clear("quests")
+  if (!token) return console.error("Failed to get token")
+  
   for (const quest of unfinished) {
     try {
       await sleep(200)
-      await DoQuest(quest, token)
+      await PostQuest(quest, token)
     } catch (e) {
       console.error("Quest error:", e)
     }
   }
-
-  state = { lastDate: today, finished: true }
-  chrome.storage.local.set(state)
 }
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.alarms.create("mainLoopAlarm", {
-    periodInMinutes: 10
-  })
+  console.error("If some issue(s) persists, please report at https://ocean102.rf.gd/feedback (rate 0 stars for bugs report). Thanks")
+  chrome.alarms.create("searches", { periodInMinutes: 5 })
+  chrome.alarms.create("quests", { periodInMinutes: 1 })
+  Quest()
+  Search()
 })
 
 chrome.alarms.onAlarm.addListener(alarm => {
-  if (alarm.name === "mainLoopAlarm") {
-    mainLoop()
-  }
+  if (alarm.name === "searches") Search()
+  if (alarm.name === "quests") Quest()
 })
