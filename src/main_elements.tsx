@@ -105,7 +105,7 @@ export function CountUp({
     return () => { rafId.current !== null && cancelAnimationFrame(rafId.current) }
   }, [from, to, duration])
 
-  return <span>{value.toLocaleString("en-US")}</span>
+  return <span>{value.toLocaleString()}</span>
 }
 
 export const Progress = ({ prog = true, percent = 0, children }: ProgressBar) => {
@@ -128,7 +128,7 @@ export const ContentSkeleton = () => <div className='mt-5 px-3'>
 
 export const Title = () => <div className='p-3 text-[18px] font-semibold items-center gap-2 flex'>
   <img src="/assets/icon.png" alt="rewards" className='size-5' />
-  <p>{config.title}</p>
+  <p>{config.title} <span className="text-[12px] text-[#aaa]">({config.version})</span></p>
 </div>
 
 const UserFX = {

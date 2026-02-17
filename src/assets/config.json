@@ -1,6 +1,6 @@
 {
     "title": "Rewards Automator",
-    "version": "2.2.5",
+    "version": "2.2.6",
     "split": {
         "pfp": "<img id=\"img_sec\" class=\"profile_img\" src=\"",
         "user": "<a id=\"redirect_info_link\" tabindex=\"0\" class=\"redirect_link additional_info\" data-clarity-mask=\"True\" title=\""

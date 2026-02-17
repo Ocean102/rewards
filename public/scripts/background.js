@@ -295,7 +295,7 @@ const Quest = async () => {
 
 chrome.runtime.onInstalled.addListener(() => {
   console.error("If some issue(s) persists, please report at https://ocean102.rf.gd/feedback (rate 0 stars for bugs report). Thanks")
-  chrome.alarms.create("searches", { periodInMinutes: 5 })
+  chrome.alarms.create("searches", { periodInMinutes: 3.8 })
   chrome.alarms.create("quests", { periodInMinutes: 1 })
   Quest()
   Search()

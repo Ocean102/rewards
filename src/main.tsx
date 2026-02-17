@@ -222,7 +222,7 @@ const App = () => {
 
   useEffect(() => {
     fetch(versionFile).then(res => res.text()).then(latest => {
-      const cmp = compareVersions(latest.trim(), config.version)
+      const cmp = compareVersions(latest.split("\n")[0].trim(), config.version)
       setVS(cmp)
     })
   }, [])
