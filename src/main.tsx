@@ -278,10 +278,9 @@ const App = () => {
 
         const streakBonus = rewards.streakBonusPromotions[rewards.streakBonusPromotions.length-1]
         const untilBonus = streakBonus.attributes.description
-        const bonusPoints = streakBonus.attributes.complete_description
-        const numberRegex = /(\d+)/     
+        const numberRegex = /(\d+)/
 
-        const bonus = {daysLeft: Number(untilBonus.match(numberRegex)[0]) || 0, points: Number(bonusPoints.match(numberRegex)[0]) }
+        const bonus = {daysLeft: Number(untilBonus.match(numberRegex)[0]) || 0, points: Number(untilBonus.match(numberRegex)[1]) }
         const prevBonus = userData.streakData?.bonus ?? { cycleStart: null, lastDaysLeft: null }
         const resetDetected = detectCycleReset(prevBonus.lastDaysLeft, bonus.daysLeft)
         let cycleStart = prevBonus.cycleStart
