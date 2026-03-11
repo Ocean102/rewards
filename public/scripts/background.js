@@ -190,15 +190,13 @@ const getLevel = (string) => Number(string.toLowerCase().split("level")[1])
 // ===== ACCOUNT & QUEST =====
 const getAccountData = async () => {
   const accountText = await (await fetch('https://rewards.bing.com/', { credentials: 'include' })).text()
-  const token = accountText.split(`<input name="__RequestVerificationToken" type="hidden" value="`)[1].split('"')[0]
+  const token = accountText.split(`name="__RequestVerificationToken" type="hidden" value="`)[1].split('"')[0]
 
   const rewardResp = await fetch(api.data, {
     "headers": {
       "accept": "application/json, text/javascript, */* q=0.01",
-      "accept-language": "en-US,enq=0.9,vi-VNq=0.8,viq=0.7",
       "correlation-context": "v=1,ms.b.tel.market=en-US",
       "priority": "u=1, i",
-      "sec-ch-ua": "\"Google Chrome\"v=\"143\", \"Chromium\"v=\"143\", \"Not A(Brand\"v=\"24\"",
     },
     "referrer": "https://rewards.bing.com/",
     "credentials": "include"

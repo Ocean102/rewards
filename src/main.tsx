@@ -16,6 +16,7 @@ import './assets/style.css'
 import { motion } from 'framer-motion'
 
 const text = config.text.main // THE TEXTS CAN BE CHANGED THROUGH THE CONFIG FILE!
+const c = console
 
 // ACCOUNT'S DATA TYPE
 type Account = {
@@ -49,7 +50,7 @@ type Quest = {
   eligible: boolean
 }
 
-function estimateCycleStart(daysLeft: number, now = new Date(), cycle = config.BONUS_CYCLE_ESTIMATION) {
+function estimateCycleStart(daysLeft: number, now = new Date(), cycle: number) {
   const mod = daysLeft % cycle
   const daysIntoCycle = mod === 0 ? 0 : cycle - mod
 
@@ -72,6 +73,8 @@ const getLevel = (string: string): number => Number(string.toLowerCase().split("
 function compareVersions(v1: string, v2: string) {
   const a = v1.split('.').map(Number)
   const b = v2.split('.').map(Number)
+
+  c.log("Comparing versions:", v1, v2)
 
   const len = Math.max(a.length, b.length)
 
@@ -100,7 +103,7 @@ const Content = ({ account }: { account: Account }) => {
   const now = Date.now()
   const percent = ((now - cycleStartDate.getTime()) / (end.getTime() - cycleStartDate.getTime()))
 
-  console.log(percent)
+  c.log(percent)
 
   return <div className='mt-5 px-3'>
     <User level={account.level} name={account.name} avatar={pfp}/>
@@ -188,7 +191,6 @@ const Content = ({ account }: { account: Account }) => {
 }
 
 // CACHE KEY
-const CACHE_KEY: string = config.cache
 
 const REPO = {
   owner: "Ocean102",
@@ -235,10 +237,10 @@ const App = () => {
         const pfp = account.split(config.split.pfp)[1].split(`" `)[0]
         const user = account.split(config.split.user)[1].split('"')[0]
 
-        console.group("[ ACCOUNT ]:")
-        console.log("Profile Picture:", pfp)
-        console.log("Display Name:", user)
-        console.groupEnd()
+        c.group("[ ACCOUNT ]:")
+        c.log("Profile Picture:", pfp)
+        c.log("Display Name:", user)
+        c.groupEnd()
         
         // GET THE REWARD'S PROGRAM USER DATA
         return fetch(api.data, {
@@ -263,24 +265,15 @@ const App = () => {
         const userLevel = getLevel(rewards.userStatus.levelInfo.activeLevel)
         const questList: Quest[] = []
 
-        let completed = 0
-        let ammount = 0
+        let [completed, amount] = [0, 0]
 
         quest.forEach(v => { 
           const questLevel = getLevel(v.attributes.locked_category_criteria || "level1")
           const eligible = userLevel >= questLevel
 
-          questList.push({
-            title: v.title,
-            complete: v.complete,
-            eligible,
-            questLevel
-          })
-
-          if (eligible) {
-            ammount++
-            if (v.complete) completed++
-          }
+          questList.push({ title: v.title, complete: v.complete, eligible, questLevel })
+          eligible && amount++
+          v.complete && completed++
         })
 
         const streakBonus = rewards.streakBonusPromotions[rewards.streakBonusPromotions.length-1]
@@ -288,33 +281,15 @@ const App = () => {
         const bonusPoints = streakBonus.attributes.complete_description
         const numberRegex = /(\d+)/     
 
-        const bonus = {
-          daysLeft: Number(untilBonus.match(numberRegex)[0]) || 0,
-          points: Number(bonusPoints.match(numberRegex)[0]),
-          
-        }
-
-        const prevBonus = userData.streakData?.bonus ?? {
-          cycleStart: null,
-          lastDaysLeft: null
-        }
-
+        const bonus = {daysLeft: Number(untilBonus.match(numberRegex)[0]) || 0, points: Number(bonusPoints.match(numberRegex)[0]) }
+        const prevBonus = userData.streakData?.bonus ?? { cycleStart: null, lastDaysLeft: null }
+        const resetDetected = detectCycleReset(prevBonus.lastDaysLeft, bonus.daysLeft)
         let cycleStart = prevBonus.cycleStart
-
-        const resetDetected = detectCycleReset(
-          prevBonus.lastDaysLeft,
-          bonus.daysLeft
-        )
-
-        // New cycle detected
+        
         if (resetDetected) cycleStart = new Date().toISOString()
-        if (!cycleStart) cycleStart = estimateCycleStart(bonus.daysLeft).toISOString()
-
-        const finalBonus = {
-          ...bonus,
-          cycleStart,
-          lastDaysLeft: bonus.daysLeft
-        }
+        if (!cycleStart) cycleStart = estimateCycleStart(bonus.daysLeft, new Date(), Math.min(Math.round(bonus.daysLeft / 1.7), config.BONUS_CYCLE_ESTIMATION)).toISOString()
+  
+        const finalBonus = {...bonus, cycleStart, lastDaysLeft: bonus.daysLeft}
 
         // INITIALIZES NEW DATA
         const freshData: Account = {
@@ -329,7 +304,7 @@ const App = () => {
           name: user,
           pfp,
           search: { max: search.pointProgressMax, val: search.pointProgress },
-          quest: { amount: ammount, completed: completed, },
+          quest: { amount: amount, completed: completed, },
           redeem: {
             price: rewards.autoRedeemItem.price,
             name: rewards.autoRedeemItem.title && rewards.autoRedeemItem.title.split('—')[1].trim(),
@@ -342,30 +317,24 @@ const App = () => {
         setData(freshData)
         setloaded(true)
 
-        console.group("[ ACCOUNT STATUS ]")
-        console.log("Points:", freshData.points)
-        console.log("Streak:", freshData.streak)
-        console.log("Level:", freshData.level)
-        console.log("Auto Redemption:", freshData.redeem)
-        console.log("Search Progress:", freshData.search)
-        console.log("Quests Progress:", freshData.quest)
-        console.log(freshData)
-        console.groupEnd()
+        c.group("[ ACCOUNT STATUS ]")
+        c.log("Points:", freshData.points)
+        c.log("Streak:", freshData.streak)
+        c.log("Level:", freshData.level)
+        c.log("Auto Redemption:", freshData.redeem)
+        c.log("Search Progress:", freshData.search)
+        c.log("Quests Progress:", freshData.quest)
+        c.log(freshData)
+        c.groupEnd()
 
-        console.group("[ QUEST ] Gathered quests through API")
-        questList.forEach(v => console.log(`${v.title}:`, v))
-        console.groupEnd()
+        c.group("[ QUEST ] Gathered quests through API")
+        questList.forEach(v => c.log(`${v.title}:`, v))
+        c.groupEnd()
 
-        console.log(JSON.stringify(freshData))
-
-        // CACHE FOR BETTER LOAD NEXT TIME
-        localStorage.setItem(CACHE_KEY, JSON.stringify(freshData))
+        c.log(JSON.stringify(freshData))
       })
     })
-    .catch(err => {
-      console.error("fetch failed...", err)
-      setloaded(true)
-    })
+    .catch(err => c.error("fetch failed...", err, setloaded(true)))
   }, [reload])
 
   useEffect(() => {
@@ -374,15 +343,12 @@ const App = () => {
   }, [])
 
   return <div className='relative bg-blue-950 text-white text-[16px] w-100 h-120 overflow-auto noscroll'>
-    <Title />
-    <hr />
+    <Title /><hr />
     { load ? (userData.user ? <Content account={userData} /> : <SignIn />) : <ContentSkeleton /> }
     <Warning />
     { (verState != 0 && verState) &&
       <>
-        <div className='mt-5 text-transparent'>
-          {config.text.notifier.version}
-        </div>
+        <div className='mt-5 text-transparent'>{config.text.notifier.version}</div>
         <div className='fixed bottom-0 w-full bg-blue-800/80 backdrop-blur-xl px-3 p-2'>
         {config.text.notifier.version.replace("{v}", config.version).replace("{t}", (verState || 0) > 0 ? config.text.notifier.old : config.text.notifier.new)}
         </div>
